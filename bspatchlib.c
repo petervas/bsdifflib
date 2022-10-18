@@ -33,7 +33,6 @@
 #include "bspatchlib.h"
 
 typedef unsigned char	u_char;
-typedef signed int		ssize_t;
 
 /***************************************************************************/
 

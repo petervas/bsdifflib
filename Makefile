@@ -5,10 +5,10 @@ LDFLAGS		+=	-lbz2
 all:		bsdiff bspatch
 
 bsdiff:		bsdiff.o bsdifflib.o
-	$(CC) $(LDFLAGS) bsdiff.o bsdifflib.o -o $@
+	$(CC) bsdiff.o bsdifflib.o $(LDFLAGS) -o $@
 
 bspatch:	bspatch.o bspatchlib.o
-	$(CC) $(LDFLAGS) bspatch.o bspatchlib.o -o $@
+	$(CC) bspatch.o bspatchlib.o $(LDFLAGS) -o $@
 
 %.o: %.c
 	$(CC) $(CFLAGS) -o $@ -c $<

@@ -1,7 +1,7 @@
 #ifndef BSDIFFLIBH__
 #define BSDIFFLIBH__
 /*-
- * Copyright 2010, Peter Vaskovic, (petervaskovic@yahoo.de)
+ * Copyright 2023 Peter Vaskovic <petervaskovic@yahoo.de>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,15 +24,16 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 	/* Returns NULL if creating the patch succeeded, and an error message otherwise. */
 	char *bsdiff(const char *oldfile, const char *newfile,
-	             const char *patchfile);
+				 const char *patchfile);
 
 #ifdef __cplusplus
 }

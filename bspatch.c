@@ -1,5 +1,5 @@
 /*-
- * Copyright 2010, Peter Vaskovic, (petervaskovic@yahoo.de)
+ * Copyright 2023 Peter Vaskovic <petervaskovic@yahoo.de>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,24 +22,24 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
 #include <stdio.h>
 #include "bspatchlib.h"
 
-int main(int argc,char * argv[])
+int main(int argc, char *argv[])
 {
 	char *errmsg;
 
-	if(argc!=4)
+	if (argc != 4)
 	{
-		printf("usage: %s oldfile newfile patchfile\n",argv[0]);
+		printf("usage: %s oldfile newfile patchfile\n", argv[0]);
 		return 1;
 	}
 
-	if((errmsg=bspatch(argv[1],argv[2],argv[3])) != NULL)
+	if ((errmsg = bspatch(argv[1], argv[2], argv[3])) != NULL)
 	{
-		printf("%s\n",errmsg);
+		printf("%s\n", errmsg);
 		return 1;
 	}
 

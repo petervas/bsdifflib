@@ -1,7 +1,7 @@
 #ifndef BSPATCHLIBH__
 #define BSPATCHLIBH__
 /*-
- * Copyright 2010, Peter Vaskovic, (petervaskovic@yahoo.de)
+ * Copyright 2023 Peter Vaskovic <petervaskovic@yahoo.de>
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,10 +24,11 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 	/* Returns NULL on success, and an error message otherwise. */
@@ -38,13 +39,13 @@ extern "C" {
 
 	/* Same */
 	char *bspatch_mem(const unsigned char *old_buf, int old_size,
-					unsigned char **new_buf, int *new_size,
-					const unsigned char *compr_patch_buf, int compr_patch_buf_sz,
-					int uncompr_ctrl_sz, int uncompr_diff_sz, int uncompr_xtra_sz);
+					  unsigned char **new_buf, int *new_size,
+					  const unsigned char *compr_patch_buf, int compr_patch_buf_sz,
+					  int uncompr_ctrl_sz, int uncompr_diff_sz, int uncompr_xtra_sz);
 
 	/* Same */
 	char *bspatch(const char *oldfile, const char *newfile,
-	              const char *patchfile);
+				  const char *patchfile);
 
 #ifdef __cplusplus
 }

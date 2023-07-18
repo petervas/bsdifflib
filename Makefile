@@ -1,5 +1,5 @@
 CC          = gcc
-CFLAGS      += -O2 -Wall -ansi
+CFLAGS      += -O2 -Wall
 LDFLAGS     += -lbz2
 
 OBJECTS     = bsdiff.o bsdifflib.o bspatch.o bspatchlib.o

@@ -34,6 +34,7 @@
 #include "bspatchlib.h"
 
 #define ERRSTR_MAX_LEN 1024
+#define HEADER_SIZE 32
 
 /***************************************************************************/
 
@@ -172,7 +173,7 @@ static char *decompress_block(const unsigned char *in_buf, int in_sz, unsigned c
 		if (known_size >= 0) /* This should not happen, but don't break if it does */
 			sz = 1024 + 8 * in_sz;
 
-		if (sz >= 32 * 1024 * 1024) /* Seems to me that 32M should be more than enough for a patch */
+		if (sz >= 128 * 1024 * 1024) /* Seems to me that 128M should be more than enough for a patch */
 			break;
 		sz *= 2;
 	}
@@ -211,7 +212,7 @@ char *bspatch_mem(const unsigned char *old_buf, int old_size,
 	 * from oldfile to x bytes from the diff block; copy y bytes from the
 	 * extra block; seek forwards in oldfile by z bytes".
 	 */
-	if (compr_patch_buf_sz < 32)
+	if (compr_patch_buf_sz < HEADER_SIZE)
 	{
 		snprintf(errstr, ERRSTR_MAX_LEN, "Corrupt patch. Too short patch size");
 		return errstr;
@@ -229,20 +230,20 @@ char *bspatch_mem(const unsigned char *old_buf, int old_size,
 	bzdifflen = offtin(compr_patch_buf + 16);
 	l_new_size = offtin(compr_patch_buf + 24);
 
-	if (bzctrllen <= 0 || bzdifflen <= 0 || l_new_size <= 0 || compr_patch_buf_sz <= 32 + bzctrllen + bzdifflen)
+	if (bzctrllen <= 0 || bzdifflen <= 0 || l_new_size <= 0 || compr_patch_buf_sz <= HEADER_SIZE + bzctrllen + bzdifflen)
 	{
 		snprintf(errstr, ERRSTR_MAX_LEN, "Corrupt patch. Bad header lengths");
 		return errstr;
 	}
-	bzextralen = compr_patch_buf_sz - 32 - bzctrllen - bzdifflen;
+	bzextralen = compr_patch_buf_sz - HEADER_SIZE - bzctrllen - bzdifflen;
 
 	dec_ctrl_sz = uncompr_ctrl_sz;
-	if ((errmsg = decompress_block(compr_patch_buf + 32, bzctrllen,
+	if ((errmsg = decompress_block(compr_patch_buf + HEADER_SIZE, bzctrllen,
 								   &dec_ctrl_buf, &dec_ctrl_sz)) != NULL)
 		return errmsg;
 
 	dec_diff_sz = uncompr_diff_sz;
-	if ((errmsg = decompress_block(compr_patch_buf + 32 + bzctrllen, bzdifflen,
+	if ((errmsg = decompress_block(compr_patch_buf + HEADER_SIZE + bzctrllen, bzdifflen,
 								   &dec_diff_buf, &dec_diff_sz)) != NULL)
 	{
 		free(dec_ctrl_buf);
@@ -250,12 +251,22 @@ char *bspatch_mem(const unsigned char *old_buf, int old_size,
 	}
 
 	dec_xtra_sz = uncompr_xtra_sz;
-	if ((errmsg = decompress_block(compr_patch_buf + 32 + bzctrllen + bzdifflen, bzextralen,
+	if ((errmsg = decompress_block(compr_patch_buf + HEADER_SIZE + bzctrllen + bzdifflen, bzextralen,
 								   &dec_xtra_buf, &dec_xtra_sz)) != NULL)
 	{
 		free(dec_diff_buf);
 		free(dec_ctrl_buf);
 		return errmsg;
+	}
+
+	/* Print decompressed ctrl/diff/xtra sizes */
+	if (old_buf == NULL)
+	{
+		free(dec_xtra_buf);
+		free(dec_diff_buf);
+		free(dec_ctrl_buf);
+		printf("Decompressed ctrl/diff/extra sizes are: %d/%d/%d.", dec_ctrl_sz, dec_diff_sz, dec_xtra_sz);
+		return NULL;
 	}
 
 	if ((l_new_buf = (unsigned char *)malloc(l_new_size + 1)) == NULL)
@@ -371,11 +382,35 @@ char *bspatch(const char *oldfile, const char *newfile, const char *patchfile)
 
 	errmsg = bspatch_mem(in_buf, in_sz, &out_buf, &out_sz, patch_buf, patch_sz, -1, -1, -1);
 	free(in_buf);
+	free(patch_buf);
 	if (errmsg)
 		return errmsg;
 
 	errmsg = mem_to_file(out_buf, out_sz, newfile);
 	free(out_buf);
+	return (errmsg) ? errmsg : NULL;
+}
+
+/***************************************************************************/
+
+char *bspatch_info(const char *patchfile)
+{
+	unsigned char *dummy_buf, *patch_buf;
+	int dummy_sz, patch_sz;
+	char *errmsg;
+
+	errmsg = file_to_mem(patchfile, &patch_buf, &patch_sz);
+	if (errmsg)
+	{
+		return errmsg;
+	}
+
+	/* Passing NULL as the first argument to bspatch_mem will make it print
+	   the decompressed ctrl/diff/xtra sizes of the patch file to the console.
+	   These can then be used when calling bspatch_mem to speed up the memory
+	   allocation */
+	errmsg = bspatch_mem(NULL, 0, &dummy_buf, &dummy_sz, patch_buf, patch_sz, -1, -1, -1);
+	free(patch_buf);
 	return (errmsg) ? errmsg : NULL;
 }
 

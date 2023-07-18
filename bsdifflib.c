@@ -34,7 +34,11 @@
 #include "bsdifflib.h"
 
 #define ERRSTR_MAX_LEN 1024
+#define HEADER_SIZE 32
+
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
+
+/***************************************************************************/
 
 static void split(off_t *I, off_t *V, off_t start, off_t len, off_t h)
 {
@@ -165,6 +169,8 @@ static void split(off_t *I, off_t *V, off_t start, off_t len, off_t h)
 	}
 }
 
+/***************************************************************************/
+
 static void qsufsort(off_t *I, off_t *V, unsigned char *old, off_t oldsize)
 {
 	off_t buckets[256];
@@ -251,6 +257,8 @@ static void qsufsort(off_t *I, off_t *V, unsigned char *old, off_t oldsize)
 	}
 }
 
+/***************************************************************************/
+
 static off_t matchlen(unsigned char *old, off_t oldsize, unsigned char *_new, off_t newsize)
 {
 	off_t i;
@@ -263,6 +271,8 @@ static off_t matchlen(unsigned char *old, off_t oldsize, unsigned char *_new, of
 
 	return i;
 }
+
+/***************************************************************************/
 
 static off_t search(off_t *I, unsigned char *old, off_t oldsize,
 					unsigned char *_new, off_t newsize, off_t st, off_t en, off_t *pos)
@@ -297,6 +307,8 @@ static off_t search(off_t *I, unsigned char *old, off_t oldsize,
 		return search(I, old, oldsize, _new, newsize, st, x, pos);
 	};
 }
+
+/***************************************************************************/
 
 static void offtout(off_t x, unsigned char *buf)
 {
@@ -340,6 +352,8 @@ static void offtout(off_t x, unsigned char *buf)
 	}
 }
 
+/***************************************************************************/
+
 char *bsdiff(const char *oldfile, const char *newfile,
 			 const char *patchfile)
 {
@@ -359,7 +373,7 @@ char *bsdiff(const char *oldfile, const char *newfile,
 	unsigned char *db = NULL;
 	unsigned char *eb = NULL;
 	unsigned char buf[8];
-	unsigned char header[32];
+	unsigned char header[HEADER_SIZE];
 	FILE *pf, *fp;
 	BZFILE *pfbz2;
 	int bz2err;
@@ -478,7 +492,7 @@ char *bsdiff(const char *oldfile, const char *newfile,
 	offtout(0, header + 16);
 	offtout(newsize, header + 24);
 
-	if (fwrite(header, 32, 1, pf) != 1)
+	if (fwrite(header, HEADER_SIZE, 1, pf) != 1)
 	{
 		snprintf(errstr, ERRSTR_MAX_LEN, "Cannot write file \"%s\".", patchfile);
 		free(I);
@@ -708,7 +722,7 @@ char *bsdiff(const char *oldfile, const char *newfile,
 		return errstr;
 	}
 
-	offtout(len - 32, header + 8);
+	offtout(len - HEADER_SIZE, header + 8);
 
 	/* Write compressed diff data */
 	if ((pfbz2 = BZ2_bzWriteOpen(&bz2err, pf, 9, 0, 0)) == NULL)
@@ -822,7 +836,7 @@ char *bsdiff(const char *oldfile, const char *newfile,
 		return errstr;
 	}
 
-	if (fwrite(header, 32, 1, pf) != 1)
+	if (fwrite(header, HEADER_SIZE, 1, pf) != 1)
 	{
 		snprintf(errstr, ERRSTR_MAX_LEN, "Cannot write file \"%s\".", patchfile);
 		free(I);

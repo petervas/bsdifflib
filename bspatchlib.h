@@ -47,6 +47,9 @@ extern "C"
 	char *bspatch(const char *oldfile, const char *newfile,
 				  const char *patchfile);
 
+	/* Same */
+	char *bspatch_info(const char *patchfile);
+
 #ifdef __cplusplus
 }
 #endif

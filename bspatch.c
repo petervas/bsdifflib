@@ -31,15 +31,29 @@ int main(int argc, char *argv[])
 {
 	char *errmsg;
 
-	if (argc != 4)
+	if (argc == 2)
 	{
-		printf("usage: %s oldfile newfile patchfile\n", argv[0]);
-		return 1;
+		/* Call bspatch_info with the single argument (patchfile) */
+		if ((errmsg = bspatch_info(argv[1])) != NULL)
+		{
+			printf("%s\n", errmsg);
+			return 1;
+		}
 	}
-
-	if ((errmsg = bspatch(argv[1], argv[2], argv[3])) != NULL)
+	else if (argc == 4)
 	{
-		printf("%s\n", errmsg);
+		/* Call bspatch with three arguments (oldfile, newfile, patchfile) */
+		if ((errmsg = bspatch(argv[1], argv[2], argv[3])) != NULL)
+		{
+			printf("%s\n", errmsg);
+			return 1;
+		}
+	}
+	else
+	{
+		printf("usage:\n");
+		printf("  for patching: %s oldfile newfile patchfile\n", argv[0]);
+		printf("  for info: %s patchfile\n", argv[0]);
 		return 1;
 	}
 

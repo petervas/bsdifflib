@@ -304,16 +304,23 @@ char *bspatch_mem(const unsigned char *old_buf, int old_size,
 		}
 
 		/* Sanity-check */
-		if (newpos + ctrl[0] > l_new_size)
+		if ((ctrl[0] < 0) || (ctrl[1] < 0))
 		{
 			snprintf(errstr, ERRSTR_MAX_LEN, "Corrupt patch 2.");
+			goto GETOUT;
+		}
+
+		/* Sanity-check */
+		if (newpos + ctrl[0] > l_new_size)
+		{
+			snprintf(errstr, ERRSTR_MAX_LEN, "Corrupt patch 3.");
 			goto GETOUT;
 		}
 
 		/* Read diff string */
 		if (pdiff > pdiff_end - ctrl[0])
 		{
-			snprintf(errstr, ERRSTR_MAX_LEN, "Corrupt patch 3.");
+			snprintf(errstr, ERRSTR_MAX_LEN, "Corrupt patch 4.");
 			goto GETOUT;
 		}
 		memcpy(l_new_buf + newpos, pdiff, ctrl[0]);
@@ -333,14 +340,14 @@ char *bspatch_mem(const unsigned char *old_buf, int old_size,
 		/* Sanity-check */
 		if (newpos + ctrl[1] > l_new_size)
 		{
-			snprintf(errstr, ERRSTR_MAX_LEN, "Corrupt patch 4.");
+			snprintf(errstr, ERRSTR_MAX_LEN, "Corrupt patch 5.");
 			goto GETOUT;
 		}
 
 		/* Read extra string */
 		if (pxtra > pxtra_end - ctrl[1])
 		{
-			snprintf(errstr, ERRSTR_MAX_LEN, "Corrupt patch 5.");
+			snprintf(errstr, ERRSTR_MAX_LEN, "Corrupt patch 6.");
 			goto GETOUT;
 		}
 		memcpy(l_new_buf + newpos, pxtra, ctrl[1]);

@@ -6,8 +6,11 @@ CC = cl
 # Compiler flags
 CFLAGS = /nologo /W3 /Ibzip2 /D_WIN32 /D_CRT_SECURE_NO_DEPRECATE /D_CRT_NONSTDC_NO_DEPRECATE /D_CRT_SECURE_NO_WARNINGS
 
+# Linker
+LINK = link
+
 # Linker flags
-LFLAGS = /nologo
+LFLAGS = /nologo /MANIFEST
 
 # Source files
 BSDIFF_SRCS = bsdiff.c bsdifflib.c
@@ -32,10 +35,10 @@ all: $(BSDIFF_TARGET) $(BSPATCH_TARGET)
 
 # Link object files
 $(BSDIFF_TARGET): $(BSDIFF_OBJS) $(BZIP2_OBJS)
-	$(CC) $(LFLAGS) /Fe$(BSDIFF_TARGET) $(BSDIFF_OBJS) $(BZIP2_OBJS)
+	$(LINK) $(LFLAGS) -out:$@ $(BSDIFF_OBJS) $(BZIP2_OBJS)
 
 $(BSPATCH_TARGET): $(BSPATCH_OBJS) $(BZIP2_OBJS)
-	$(CC) $(LFLAGS) /Fe$(BSPATCH_TARGET) $(BSPATCH_OBJS) $(BZIP2_OBJS)
+	$(LINK) $(LFLAGS) -out:$@ $(BSPATCH_OBJS) $(BZIP2_OBJS)
 
 # Clean target
 clean:

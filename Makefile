@@ -2,25 +2,22 @@ CC          = gcc
 CFLAGS      += -O2 -Wall
 LDFLAGS     += -lbz2
 
-OBJECTS     = bsdiff.o bsdifflib.o bspatch.o bspatchlib.o
+SOURCES     = bsdiff.c bsdifflib.c bspatch.c bspatchlib.c
+OBJECTS     = $(SOURCES:.c=.o)
+EXECUTABLES = bsdiff bspatch
 
 .PHONY: all clean
 
-all: bsdiff bspatch
+all: $(EXECUTABLES)
 
 bsdiff: bsdiff.o bsdifflib.o
-	$(CC) $^ $(LDFLAGS) -o $@
-
 bspatch: bspatch.o bspatchlib.o
+
+$(EXECUTABLES): %: %.o
 	$(CC) $^ $(LDFLAGS) -o $@
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-bsdiff.o: bsdiff.c
-bsdifflib.o: bsdifflib.c
-bspatch.o: bspatch.c
-bspatchlib.o: bspatchlib.c
-
 clean:
-	rm -f bsdiff bspatch $(OBJECTS)
+	rm -f $(EXECUTABLES) $(OBJECTS)

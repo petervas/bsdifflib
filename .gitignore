@@ -56,5 +56,5 @@ bsdiff
 bspatch
 
 # bzip2 files
-bzip2/
+bzip2/*
 !bzip2/.gitkeep

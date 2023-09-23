@@ -12,6 +12,9 @@
 *.map
 *.exp
 
+# Manifest files
+*.manifest
+
 # Precompiled Headers
 *.gch
 *.pch

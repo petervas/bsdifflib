@@ -10,12 +10,12 @@ so multiple patches in succession can be applied without disk access.
 See bsdiff.c/bspatch.c for example usage.
 
 Error handling was inspired by GetWAD, written by
-Copyright 2003-2010 Hippocrates Sendoukas <hsendoukas@hotmail.com>
-available at http://getwad.keystone.gr/
+Copyright 2003-2024 Hippocrates Sendoukas <hsendoukas@hotmail.com>
+available at http://getwad.zdaemon.org/
 
 I would like to thank Hippocrates Sendoukas for helping me out with some
 C related questions and giving me helpful coding suggestions in general.
-You can visit his site at http://hs.keystone.gr/
+You can visit his site at http://hs.zdaemon.org/
 
 Compile:
 
@@ -24,6 +24,11 @@ Compile:
              Run nmake -f Makefile.mak
 
 Changelog:
+
+    bsdifflib/bspatchlib 1.3 (21 September 2024)
+
+        Restored compatibility with older Visual Studio versions.
+        Fixed manifest handling. No more UAC in Windows.
 
     bsdifflib/bspatchlib 1.2 (9 September 2023)
 

@@ -4,13 +4,13 @@
 CC = cl
 
 # Compiler flags
-CFLAGS = /nologo /O2 /W3 /Ibzip2 /D_WIN32 /D_CRT_SECURE_NO_DEPRECATE /D_CRT_NONSTDC_NO_DEPRECATE /D_CRT_SECURE_NO_WARNINGS
+CFLAGS = /nologo /O2 /W3 /Ibzip2 /D_CRT_SECURE_NO_DEPRECATE /D_CRT_NONSTDC_NO_DEPRECATE /D_CRT_SECURE_NO_WARNINGS
 
 # Linker
 LINK = link
 
 # Linker flags
-LFLAGS = /nologo /MANIFEST
+LFLAGS = /nologo /MANIFEST:EMBED /MANIFESTUAC:"level='asInvoker' uiAccess='false'"
 
 # Source files
 BSDIFF_SRCS = bsdiff.c bsdifflib.c
@@ -42,4 +42,4 @@ $(BSPATCH_TARGET): $(BSPATCH_OBJS) $(BZIP2_OBJS)
 
 # Clean target
 clean:
-	del /Q /F $(BSDIFF_OBJS) $(BSPATCH_OBJS) $(BZIP2_OBJS) $(BSDIFF_TARGET) $(BSPATCH_TARGET) $(BSDIFF_TARGET).manifest $(BSPATCH_TARGET).manifest
+	del /Q /F $(BSDIFF_OBJS) $(BSPATCH_OBJS) $(BZIP2_OBJS) $(BSDIFF_TARGET) $(BSPATCH_TARGET)

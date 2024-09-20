@@ -38,6 +38,10 @@
 
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
+#if defined(_MSC_VER) && _MSC_VER < 1900		//VS before 2015
+	#define snprintf	_snprintf
+#endif
+
 /***************************************************************************/
 
 static void split(off_t *I, off_t *V, off_t start, off_t len, off_t h)

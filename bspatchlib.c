@@ -57,6 +57,20 @@
 #define OFF_MIN TYPE_MINIMUM(off_t)
 #endif
 
+#if defined(_MSC_VER) && _MSC_VER < 1900		//VS before 2015
+	#define snprintf	_snprintf
+#endif
+
+#if defined(_MSC_VER) && _MSC_VER < 1800		//VS before 2013
+	#if defined(_WIN64)
+		#define SIZE_T_FMT "%llu"
+	#else
+		#define SIZE_T_FMT "%lu"
+	#endif
+#else
+	#define SIZE_T_FMT "%zu"
+#endif
+
 /***************************************************************************/
 
 char *file_to_mem(const char *fname, unsigned char **buf, int *buf_sz)
@@ -80,10 +94,16 @@ char *file_to_mem(const char *fname, unsigned char **buf, int *buf_sz)
 		snprintf(errstr, ERRSTR_MAX_LEN, "Seek failure on file \"%s\".", fname);
 		return errstr;
 	}
+	if (l_sz > INT_MAX)
+	{
+		fclose(f);
+		snprintf(errstr, ERRSTR_MAX_LEN, "File size (" SIZE_T_FMT " bytes) exceeds maximum limit for an int.", l_sz);
+		return errstr;
+	}
 	if ((l_buf = (unsigned char *)malloc(l_sz + 1)) == NULL)
 	{
 		fclose(f);
-		snprintf(errstr, ERRSTR_MAX_LEN, "Cannot allocate %ld bytes to read file \"%s\" into memory.", l_sz + 1, fname);
+		snprintf(errstr, ERRSTR_MAX_LEN, "Cannot allocate " SIZE_T_FMT " bytes to read file \"%s\" into memory.", l_sz + 1, fname);
 		return errstr;
 	}
 
@@ -98,7 +118,7 @@ char *file_to_mem(const char *fname, unsigned char **buf, int *buf_sz)
 	}
 	fclose(f);
 	*buf = l_buf;
-	*buf_sz = l_sz;
+	*buf_sz = (int)l_sz;
 	return NULL;
 }
 

@@ -302,7 +302,7 @@ static off_t search(off_t *I, unsigned char *old, off_t oldsize,
 
 	x = st + (en - st) / 2;
 
-	if (memcmp(old + I[x], _new, MIN(oldsize - I[x], newsize)) < 0)
+	if (memcmp(old + I[x], _new, MIN(oldsize - I[x], newsize)) <= 0)
 	{
 		return search(I, old, oldsize, _new, newsize, x, en, pos);
 	}

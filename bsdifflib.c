@@ -495,8 +495,18 @@ char *bsdiff(const char *oldfile, const char *newfile,
 	{
 		oldscore = 0;
 
+		/* If we come across a large block of data that only differs
+		 * by less than 8 bytes, this loop will take a long time to
+		 * go past that block of data. We need to track the number of
+		 * times we're stuck in the block and break out of it. */
+		int num_less_than_eight = 0;
+		off_t prev_len, prev_oldscore, prev_pos;
 		for (scsc = scan += len; scan < newsize; scan++)
 		{
+			prev_len = len;
+			prev_oldscore = oldscore;
+			prev_pos = pos;
+
 			len = search(I, old, oldsize, _new + scan, newsize - scan,
 						 0, oldsize, &pos);
 
@@ -518,6 +528,22 @@ char *bsdiff(const char *oldfile, const char *newfile,
 			{
 				oldscore--;
 			}
+
+			const off_t fuzz = 8;
+			if (prev_len-fuzz <= len && len <= prev_len &&
+			    prev_oldscore-fuzz <= oldscore &&
+			    oldscore <= prev_oldscore &&
+			    prev_pos <= pos && pos <= prev_pos + fuzz &&
+			    oldscore <= len && len <= oldscore + fuzz)
+			{
+				++num_less_than_eight;
+			}
+			else
+			{
+				num_less_than_eight = 0;
+			}
+
+			if (num_less_than_eight > 100) break;
 		};
 
 		if ((len != oldscore) || (scan == newsize))
@@ -593,7 +619,6 @@ char *bsdiff(const char *oldfile, const char *newfile,
 				};
 
 				lenf += lens - overlap;
-
 				lenb -= lens;
 			};
 

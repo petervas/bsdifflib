@@ -392,7 +392,7 @@ char *bsdiff(const char *oldfile, const char *newfile,
 		(fseek(fp, 0, SEEK_SET) != 0) ||
 		((off_t)fread(old, 1, oldsize, fp) != oldsize))
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "Cannot process file \"%s\".", oldfile);
+		snprintf(errstr, sizeof(errstr), "Cannot process file \"%s\".", oldfile);
 		free(old);
 		if (fp)
 			fclose(fp);
@@ -401,7 +401,7 @@ char *bsdiff(const char *oldfile, const char *newfile,
 
 	if (fclose(fp) != 0)
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "Cannot close file \"%s\".", oldfile);
+		snprintf(errstr, sizeof(errstr), "Cannot close file \"%s\".", oldfile);
 		free(old);
 		return errstr;
 	}
@@ -409,7 +409,7 @@ char *bsdiff(const char *oldfile, const char *newfile,
 	if (((I = (off_t *)malloc((oldsize + 1) * sizeof(off_t))) == NULL) ||
 		((V = (off_t *)malloc((oldsize + 1) * sizeof(off_t))) == NULL))
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "Cannot allocate memory.");
+		snprintf(errstr, sizeof(errstr), "Cannot allocate memory.");
 		free(I);
 		free(V);
 		free(old);
@@ -428,7 +428,7 @@ char *bsdiff(const char *oldfile, const char *newfile,
 		(fseek(fp, 0, SEEK_SET) != 0) ||
 		((off_t)fread(_new, 1, newsize, fp) != newsize))
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "Cannot process file \"%s\".", newfile);
+		snprintf(errstr, sizeof(errstr), "Cannot process file \"%s\".", newfile);
 		if (fp)
 			fclose(fp);
 		goto GETOUT;
@@ -436,14 +436,14 @@ char *bsdiff(const char *oldfile, const char *newfile,
 
 	if (fclose(fp) != 0)
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "Cannot process file \"%s\".", newfile);
+		snprintf(errstr, sizeof(errstr), "Cannot process file \"%s\".", newfile);
 		goto GETOUT;
 	}
 
 	if (((db = (unsigned char *)malloc(newsize + 1)) == NULL) ||
 		((eb = (unsigned char *)malloc(newsize + 1)) == NULL))
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "Cannot allocate memory.");
+		snprintf(errstr, sizeof(errstr), "Cannot allocate memory.");
 		goto GETOUT_DB;
 	}
 
@@ -453,7 +453,7 @@ char *bsdiff(const char *oldfile, const char *newfile,
 	/* Create the patch file */
 	if ((pf = fopen(patchfile, "wb")) == NULL)
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "Cannot open file \"%s\".", patchfile);
+		snprintf(errstr, sizeof(errstr), "Cannot open file \"%s\".", patchfile);
 		goto GETOUT_DB;
 	}
 
@@ -474,14 +474,14 @@ char *bsdiff(const char *oldfile, const char *newfile,
 
 	if (fwrite(header, HEADER_SIZE, 1, pf) != 1)
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "Cannot write file \"%s\".", patchfile);
+		snprintf(errstr, sizeof(errstr), "Cannot write file \"%s\".", patchfile);
 		goto GETOUT_PF;
 	}
 
 	/* Compute the differences, writing ctrl as we go */
 	if ((pfbz2 = BZ2_bzWriteOpen(&bz2err, pf, 9, 0, 0)) == NULL)
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "BZ2_bzWriteOpen, bz2err = %d", bz2err);
+		snprintf(errstr, sizeof(errstr), "BZ2_bzWriteOpen, bz2err = %d", bz2err);
 		goto GETOUT_PF;
 	}
 
@@ -614,7 +614,7 @@ char *bsdiff(const char *oldfile, const char *newfile,
 
 			if (bz2err != BZ_OK)
 			{
-				snprintf(errstr, ERRSTR_MAX_LEN, "BZ2_bzWrite, bz2err = %d", bz2err);
+				snprintf(errstr, sizeof(errstr), "BZ2_bzWrite, bz2err = %d", bz2err);
 				goto GETOUT_PFBZ;
 			}
 
@@ -623,7 +623,7 @@ char *bsdiff(const char *oldfile, const char *newfile,
 
 			if (bz2err != BZ_OK)
 			{
-				snprintf(errstr, ERRSTR_MAX_LEN, "BZ2_bzWrite, bz2err = %d", bz2err);
+				snprintf(errstr, sizeof(errstr), "BZ2_bzWrite, bz2err = %d", bz2err);
 				goto GETOUT_PFBZ;
 			}
 
@@ -632,7 +632,7 @@ char *bsdiff(const char *oldfile, const char *newfile,
 
 			if (bz2err != BZ_OK)
 			{
-				snprintf(errstr, ERRSTR_MAX_LEN, "BZ2_bzWrite, bz2err = %d", bz2err);
+				snprintf(errstr, sizeof(errstr), "BZ2_bzWrite, bz2err = %d", bz2err);
 				goto GETOUT_PFBZ;
 			}
 
@@ -646,14 +646,14 @@ char *bsdiff(const char *oldfile, const char *newfile,
 
 	if (bz2err != BZ_OK)
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "BZ2_bzWriteClose, bz2err = %d", bz2err);
+		snprintf(errstr, sizeof(errstr), "BZ2_bzWriteClose, bz2err = %d", bz2err);
 		goto GETOUT_PF;
 	}
 
 	/* Compute size of compressed ctrl data */
 	if ((len = ftell(pf)) == -1)
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "Cannot return current value of the position indicator in file \"%s\".", patchfile);
+		snprintf(errstr, sizeof(errstr), "Cannot return current value of the position indicator in file \"%s\".", patchfile);
 		goto GETOUT_PF;
 	}
 
@@ -662,7 +662,7 @@ char *bsdiff(const char *oldfile, const char *newfile,
 	/* Write compressed diff data */
 	if ((pfbz2 = BZ2_bzWriteOpen(&bz2err, pf, 9, 0, 0)) == NULL)
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "BZ2_bzWriteOpen, bz2err = %d", bz2err);
+		snprintf(errstr, sizeof(errstr), "BZ2_bzWriteOpen, bz2err = %d", bz2err);
 		goto GETOUT_PF;
 	}
 
@@ -670,7 +670,7 @@ char *bsdiff(const char *oldfile, const char *newfile,
 
 	if (bz2err != BZ_OK)
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "BZ2_bzWrite, bz2err = %d", bz2err);
+		snprintf(errstr, sizeof(errstr), "BZ2_bzWrite, bz2err = %d", bz2err);
 		goto GETOUT_PFBZ;
 	}
 
@@ -678,14 +678,14 @@ char *bsdiff(const char *oldfile, const char *newfile,
 
 	if (bz2err != BZ_OK)
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "BZ2_bzWriteClose, bz2err = %d", bz2err);
+		snprintf(errstr, sizeof(errstr), "BZ2_bzWriteClose, bz2err = %d", bz2err);
 		goto GETOUT_PF;
 	}
 
 	/* Compute size of compressed diff data */
 	if ((newsize = ftell(pf)) == -1)
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "Cannot return current value of the position indicator in file \"%s\".", patchfile);
+		snprintf(errstr, sizeof(errstr), "Cannot return current value of the position indicator in file \"%s\".", patchfile);
 		goto GETOUT_PF;
 	}
 
@@ -694,7 +694,7 @@ char *bsdiff(const char *oldfile, const char *newfile,
 	/* Write compressed extra data */
 	if ((pfbz2 = BZ2_bzWriteOpen(&bz2err, pf, 9, 0, 0)) == NULL)
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "BZ2_bzWriteOpen, bz2err = %d", bz2err);
+		snprintf(errstr, sizeof(errstr), "BZ2_bzWriteOpen, bz2err = %d", bz2err);
 		goto GETOUT_PF;
 	}
 
@@ -702,7 +702,7 @@ char *bsdiff(const char *oldfile, const char *newfile,
 
 	if (bz2err != BZ_OK)
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "BZ2_bzWrite, bz2err = %d", bz2err);
+		snprintf(errstr, sizeof(errstr), "BZ2_bzWrite, bz2err = %d", bz2err);
 	GETOUT_PFBZ:
 		BZ2_bzWriteClose(&bz2err, pfbz2, 0, NULL, NULL);
 	GETOUT_PF:
@@ -721,26 +721,26 @@ char *bsdiff(const char *oldfile, const char *newfile,
 
 	if (bz2err != BZ_OK)
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "BZ2_bzWriteClose, bz2err = %d", bz2err);
+		snprintf(errstr, sizeof(errstr), "BZ2_bzWriteClose, bz2err = %d", bz2err);
 		goto GETOUT_PF;
 	}
 
 	/* Seek to the beginning, write the header, and close the file */
 	if (fseek(pf, 0, SEEK_SET))
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "Cannot change the file position indicator in file \"%s\".", patchfile);
+		snprintf(errstr, sizeof(errstr), "Cannot change the file position indicator in file \"%s\".", patchfile);
 		goto GETOUT_PF;
 	}
 
 	if (fwrite(header, HEADER_SIZE, 1, pf) != 1)
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "Cannot write file \"%s\".", patchfile);
+		snprintf(errstr, sizeof(errstr), "Cannot write file \"%s\".", patchfile);
 		goto GETOUT_PF;
 	}
 
 	if (fclose(pf))
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "Cannot close file \"%s\".", patchfile);
+		snprintf(errstr, sizeof(errstr), "Cannot close file \"%s\".", patchfile);
 		goto GETOUT_DB;
 	}
 

@@ -85,25 +85,25 @@ char *file_to_mem(const char *fname, unsigned char **buf, int *buf_sz)
 
 	if ((f = fopen(fname, "rb")) == NULL)
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "Cannot open file \"%s\" for reading.", fname);
+		snprintf(errstr, sizeof(errstr), "Cannot open file \"%s\" for reading.", fname);
 		return errstr;
 	}
 	if (fseek(f, 0, SEEK_END) || (l_sz = ftell(f)) < 0)
 	{
 		fclose(f);
-		snprintf(errstr, ERRSTR_MAX_LEN, "Seek failure on file \"%s\".", fname);
+		snprintf(errstr, sizeof(errstr), "Seek failure on file \"%s\".", fname);
 		return errstr;
 	}
 	if (l_sz > INT_MAX)
 	{
 		fclose(f);
-		snprintf(errstr, ERRSTR_MAX_LEN, "File size (" SIZE_T_FMT " bytes) exceeds maximum limit for an int.", l_sz);
+		snprintf(errstr, sizeof(errstr), "File size (" SIZE_T_FMT " bytes) exceeds maximum limit for an int.", l_sz);
 		return errstr;
 	}
 	if ((l_buf = (unsigned char *)malloc(l_sz + 1)) == NULL)
 	{
 		fclose(f);
-		snprintf(errstr, ERRSTR_MAX_LEN, "Cannot allocate " SIZE_T_FMT " bytes to read file \"%s\" into memory.", l_sz + 1, fname);
+		snprintf(errstr, sizeof(errstr), "Cannot allocate " SIZE_T_FMT " bytes to read file \"%s\" into memory.", l_sz + 1, fname);
 		return errstr;
 	}
 
@@ -113,7 +113,7 @@ char *file_to_mem(const char *fname, unsigned char **buf, int *buf_sz)
 	{
 		free(l_buf);
 		fclose(f);
-		snprintf(errstr, ERRSTR_MAX_LEN, "Cannot read from file \"%s\".", fname);
+		snprintf(errstr, sizeof(errstr), "Cannot read from file \"%s\".", fname);
 		return errstr;
 	}
 	fclose(f);
@@ -131,13 +131,13 @@ char *mem_to_file(const unsigned char *buf, int buf_sz, const char *fname)
 
 	if ((f = fopen(fname, "wb")) == NULL)
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "Cannot open file \"%s\" for writing.", fname);
+		snprintf(errstr, sizeof(errstr), "Cannot open file \"%s\" for writing.", fname);
 		return errstr;
 	}
 	if ((int)fwrite(buf, 1, buf_sz, f) != buf_sz)
 	{
 		fclose(f);
-		snprintf(errstr, ERRSTR_MAX_LEN, "Cannot write to file \"%s\".", fname);
+		snprintf(errstr, sizeof(errstr), "Cannot write to file \"%s\".", fname);
 		return errstr;
 	}
 	fclose(f);
@@ -201,26 +201,26 @@ static char *decompress_block(const unsigned char *in_buf, unsigned in_sz, unsig
 
 	if (in_sz == 0) /* BZ2 file cannot be empty. It must at least have a header */
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "decompress_block: compressed file cannot be empty");
+		snprintf(errstr, sizeof(errstr), "decompress_block: compressed file cannot be empty");
 		return errstr;
 	}
 
 	if (in_sz >= INT_MAX) /* Compressed input file is bigger than 2 GB */
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "decompress_block: compressed file is too big");
+		snprintf(errstr, sizeof(errstr), "decompress_block: compressed file is too big");
 		return errstr;
 	}
 
 	if (known_size >= INT_MAX) /* Uncompressed output file is bigger than 2 GB */
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "decompress_block: uncompressed file is too big");
+		snprintf(errstr, sizeof(errstr), "decompress_block: uncompressed file is too big");
 		return errstr;
 	}
 
 	sz = (known_size >= 0) ? ((unsigned)known_size + 16) : 2 * in_sz;
 	if ((buf = (unsigned char *)malloc(sz)) == NULL)
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "decompress_block: cannot allocate %u bytes for patch", sz);
+		snprintf(errstr, sizeof(errstr), "decompress_block: cannot allocate %u bytes for patch", sz);
 		return errstr;
 	}
 
@@ -236,7 +236,7 @@ static char *decompress_block(const unsigned char *in_buf, unsigned in_sz, unsig
 		if (rc != BZ_OUTBUFF_FULL)
 		{
 			free(buf); /* Release memory if decompression failed for some other reason */
-			snprintf(errstr, ERRSTR_MAX_LEN, "decompress_block: BZ2_bzBuffToBuffDecompress() returned %d", rc);
+			snprintf(errstr, sizeof(errstr), "decompress_block: BZ2_bzBuffToBuffDecompress() returned %d", rc);
 			return errstr;
 		}
 
@@ -263,13 +263,13 @@ static char *decompress_block(const unsigned char *in_buf, unsigned in_sz, unsig
 		if ((new_buf = (unsigned char *)realloc(buf, sz)) == NULL) /* Allocate more memory */
 		{
 			free(buf);
-			snprintf(errstr, ERRSTR_MAX_LEN, "decompress_block: cannot allocate %u bytes for patch", sz);
+			snprintf(errstr, sizeof(errstr), "decompress_block: cannot allocate %u bytes for patch", sz);
 			return errstr;
 		}
 		buf = new_buf;
 	}
 	free(buf);
-	snprintf(errstr, ERRSTR_MAX_LEN, "decompress_block: even %u bytes are not enough for the patch", sz);
+	snprintf(errstr, sizeof(errstr), "decompress_block: even %u bytes are not enough for the patch", sz);
 	return errstr;
 }
 
@@ -307,14 +307,14 @@ char *bspatch_mem(const unsigned char *old_buf, int old_size,
 	 */
 	if (compr_patch_buf_sz < HEADER_SIZE)
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "Corrupt patch. Too short patch size.");
+		snprintf(errstr, sizeof(errstr), "Corrupt patch. Too short patch size.");
 		return errstr;
 	}
 
 	/* Check for appropriate magic */
 	if (memcmp(compr_patch_buf, "BSDIFF40", 8) != 0)
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "Corrupt patch. Bad header signature.");
+		snprintf(errstr, sizeof(errstr), "Corrupt patch. Bad header signature.");
 		return errstr;
 	}
 
@@ -327,7 +327,7 @@ char *bspatch_mem(const unsigned char *old_buf, int old_size,
 	if (add_off_t_overflow(HEADER_SIZE, bzctrllen, &res_add_off_t) ||
 		add_off_t_overflow(HEADER_SIZE + bzctrllen, bzdifflen, &res_add_off_t))
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "Corrupt patch. Overflow 1.");
+		snprintf(errstr, sizeof(errstr), "Corrupt patch. Overflow 1.");
 		return errstr;
 	}
 
@@ -336,7 +336,7 @@ char *bspatch_mem(const unsigned char *old_buf, int old_size,
 		l_new_size < 0 || l_new_size > INT_MAX ||
 		compr_patch_buf_sz <= HEADER_SIZE + bzctrllen + bzdifflen)
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "Corrupt patch. Bad header lengths.");
+		snprintf(errstr, sizeof(errstr), "Corrupt patch. Bad header lengths.");
 		return errstr;
 	}
 	bzextralen = compr_patch_buf_sz - HEADER_SIZE - bzctrllen - bzdifflen;
@@ -344,7 +344,7 @@ char *bspatch_mem(const unsigned char *old_buf, int old_size,
 	/* Limiting the size to INT_MAX should be good enough */
 	if (bzctrllen > INT_MAX || bzdifflen > INT_MAX || bzextralen > INT_MAX)
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "Corrupt patch. Patch is too big.");
+		snprintf(errstr, sizeof(errstr), "Corrupt patch. Patch is too big.");
 		return errstr;
 	}
 
@@ -382,7 +382,7 @@ char *bspatch_mem(const unsigned char *old_buf, int old_size,
 
 	if ((l_new_buf = (unsigned char *)malloc(l_new_size + 1)) == NULL)
 	{
-		snprintf(errstr, ERRSTR_MAX_LEN, "Cannot allocate %ld bytes to create the patch.", l_new_size + 1);
+		snprintf(errstr, sizeof(errstr), "Cannot allocate %ld bytes to create the patch.", l_new_size + 1);
 		free(dec_xtra_buf);
 		free(dec_diff_buf);
 		free(dec_ctrl_buf);
@@ -400,7 +400,7 @@ char *bspatch_mem(const unsigned char *old_buf, int old_size,
 		/* Read control data */
 		if (pctrl > pctrl_end - 2 * 8)
 		{
-			snprintf(errstr, ERRSTR_MAX_LEN, "Corrupt patch 1.");
+			snprintf(errstr, sizeof(errstr), "Corrupt patch 1.");
 		GETOUT:
 			free(dec_xtra_buf);
 			free(dec_diff_buf);
@@ -418,28 +418,28 @@ char *bspatch_mem(const unsigned char *old_buf, int old_size,
 		if (ctrl[0] < 0 || ctrl[0] > INT_MAX ||
 			(ctrl[1] < 0) || ctrl[1] > INT_MAX)
 		{
-			snprintf(errstr, ERRSTR_MAX_LEN, "Corrupt patch 2.");
+			snprintf(errstr, sizeof(errstr), "Corrupt patch 2.");
 			goto GETOUT;
 		}
 
 		/* Overflow-check */
 		if (add_off_t_overflow(newpos, ctrl[0], &res_add_off_t))
 		{
-			snprintf(errstr, ERRSTR_MAX_LEN, "Corrupt patch. Overflow 2.");
+			snprintf(errstr, sizeof(errstr), "Corrupt patch. Overflow 2.");
 			goto GETOUT;
 		}
 
 		/* Sanity-check */
 		if (res_add_off_t > l_new_size)
 		{
-			snprintf(errstr, ERRSTR_MAX_LEN, "Corrupt patch 3.");
+			snprintf(errstr, sizeof(errstr), "Corrupt patch 3.");
 			goto GETOUT;
 		}
 
 		/* Read diff string */
 		if (pdiff > pdiff_end - ctrl[0])
 		{
-			snprintf(errstr, ERRSTR_MAX_LEN, "Corrupt patch 4.");
+			snprintf(errstr, sizeof(errstr), "Corrupt patch 4.");
 			goto GETOUT;
 		}
 		memcpy(l_new_buf + newpos, pdiff, ctrl[0]);
@@ -448,7 +448,7 @@ char *bspatch_mem(const unsigned char *old_buf, int old_size,
 		/* Overflow-check */
 		if (add_off_t_overflow(oldpos, ctrl[0], &res_add_off_t))
 		{
-			snprintf(errstr, ERRSTR_MAX_LEN, "Corrupt patch. Overflow 3.");
+			snprintf(errstr, sizeof(errstr), "Corrupt patch. Overflow 3.");
 			goto GETOUT;
 		}
 
@@ -463,7 +463,7 @@ char *bspatch_mem(const unsigned char *old_buf, int old_size,
 		oldpos = res_add_off_t;
 		if (add_off_t_overflow(newpos, ctrl[0], &res_add_off_t))
 		{
-			snprintf(errstr, ERRSTR_MAX_LEN, "Corrupt patch. Overflow 4.");
+			snprintf(errstr, sizeof(errstr), "Corrupt patch. Overflow 4.");
 			goto GETOUT;
 		}
 		newpos = res_add_off_t;
@@ -471,21 +471,21 @@ char *bspatch_mem(const unsigned char *old_buf, int old_size,
 		/* Overflow-check */
 		if (add_off_t_overflow(newpos, ctrl[1], &res_add_off_t))
 		{
-			snprintf(errstr, ERRSTR_MAX_LEN, "Corrupt patch. Overflow 5.");
+			snprintf(errstr, sizeof(errstr), "Corrupt patch. Overflow 5.");
 			goto GETOUT;
 		}
 
 		/* Sanity-check */
 		if (res_add_off_t > l_new_size)
 		{
-			snprintf(errstr, ERRSTR_MAX_LEN, "Corrupt patch 5.");
+			snprintf(errstr, sizeof(errstr), "Corrupt patch 5.");
 			goto GETOUT;
 		}
 
 		/* Read extra string */
 		if (pxtra > pxtra_end - ctrl[1])
 		{
-			snprintf(errstr, ERRSTR_MAX_LEN, "Corrupt patch 6.");
+			snprintf(errstr, sizeof(errstr), "Corrupt patch 6.");
 			goto GETOUT;
 		}
 		memcpy(l_new_buf + newpos, pxtra, ctrl[1]);
@@ -495,7 +495,7 @@ char *bspatch_mem(const unsigned char *old_buf, int old_size,
 		newpos = res_add_off_t;
 		if (add_off_t_overflow(oldpos, ctrl[2], &res_add_off_t))
 		{
-			snprintf(errstr, ERRSTR_MAX_LEN, "Corrupt patch. Overflow 6.");
+			snprintf(errstr, sizeof(errstr), "Corrupt patch. Overflow 6.");
 			goto GETOUT;
 		}
 		oldpos = res_add_off_t;

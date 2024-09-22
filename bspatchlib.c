@@ -71,11 +71,18 @@
 	#define SIZE_T_FMT "%zu"
 #endif
 
+#ifdef _WIN32
+	#define LONG_LONG_FMT "%I64d"
+#else
+	#define LONG_LONG_FMT "%lld"
+#endif
+
 /***************************************************************************/
 
 char *file_to_mem(const char *fname, unsigned char **buf, int *buf_sz)
 {
 	FILE *f;
+	long f_sz;
 	size_t l_sz;
 	unsigned char *l_buf;
 	static char errstr[ERRSTR_MAX_LEN];
@@ -88,18 +95,21 @@ char *file_to_mem(const char *fname, unsigned char **buf, int *buf_sz)
 		snprintf(errstr, sizeof(errstr), "Cannot open file \"%s\" for reading.", fname);
 		return errstr;
 	}
-	if (fseek(f, 0, SEEK_END) || (l_sz = ftell(f)) < 0)
+	if (fseek(f, 0, SEEK_END) || (f_sz = ftell(f)) < 0)
 	{
 		fclose(f);
 		snprintf(errstr, sizeof(errstr), "Seek failure on file \"%s\".", fname);
 		return errstr;
 	}
-	if (l_sz > INT_MAX)
+
+	if (f_sz >= INT_MAX)
 	{
 		fclose(f);
-		snprintf(errstr, sizeof(errstr), "File size (" SIZE_T_FMT " bytes) exceeds maximum limit for an int.", l_sz);
+		snprintf(errstr, sizeof(errstr), "File size (" LONG_LONG_FMT " bytes) exceeds maximum limit for an int.", (long long)f_sz);
 		return errstr;
 	}
+	l_sz = (size_t)f_sz;
+
 	if ((l_buf = (unsigned char *)malloc(l_sz + 1)) == NULL)
 	{
 		fclose(f);
@@ -109,7 +119,7 @@ char *file_to_mem(const char *fname, unsigned char **buf, int *buf_sz)
 
 	fseek(f, 0, SEEK_SET);
 
-	if ((int)fread(l_buf, 1, l_sz, f) != l_sz)
+	if (fread(l_buf, 1, l_sz, f) != l_sz)
 	{
 		free(l_buf);
 		fclose(f);
